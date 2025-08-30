@@ -5,6 +5,7 @@ metadata:
   labels:
     app: recipe-api
   name: recipe-api
+  namespace: recipe-api
 spec:
   replicas: 1
   selector:
