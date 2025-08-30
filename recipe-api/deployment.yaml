@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: recipe-api
+  name: recipe-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recipe-api
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: recipe-api
+    spec:
+      containers:
+      - image: ghcr.io/kkato/recipe-api:latest
+        name: recipe-api
+    imagePullSecrets:
+        - name: ghcr
