@@ -1,3 +1,24 @@
-# ArgoCD自体はhelmfile (addons/helmfile.yaml) で管理するため、
-# ArgoCD Applicationとしてのself-manage は現時点では行わない。
-# 将来的にself-manageに移行する場合はここにApplication定義を追加する。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 7.8.13
+      helm:
+        valueFiles:
+          - $values/addons/argocd/values.yaml
+    - repoURL: git@github.com:kkato/k8s
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
