@@ -1,0 +1,3 @@
+# ArgoCD自体はhelmfile (addons/helmfile.yaml) で管理するため、
+# ArgoCD Applicationとしてのself-manage は現時点では行わない。
+# 将来的にself-manageに移行する場合はここにApplication定義を追加する。
