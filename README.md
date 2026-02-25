@@ -8,6 +8,10 @@ Kubernetesクラスタのマニフェスト管理リポジトリ。ArgoCDによ�
 k8s/
 ├── apps/          # 自作アプリケーション (素のK8sマニフェスト)
 ├── addons/        # クラスタaddon (Helmfile管理)
+│   ├── helmfile.yaml
+│   ├── argocd/
+│   ├── external-secrets/
+│   └── cloudflare-tunnel-ingress-controller/
 └── argocd/        # ArgoCD Application定義
     ├── apps/      # apps/ 配下のアプリ用
     └── addons/    # addons/ 配下のaddon用
@@ -19,7 +23,11 @@ k8s/
 
 ### addons/
 
-ArgoCD、Ingress Controllerなどのクラスタaddonを管理する。Helmfileで管理し、`helmfile sync` で適用する。
+ArgoCD、External Secrets Operatorなどのクラスタaddonを管理する。各addonはArgoCD Applicationで直接Helm chartを参照する。helmfile.yamlはbootstrap用として残す。
+
+各addonディレクトリには以下を配置する：
+- `values.yaml` - Helm chartのカスタムvalues
+- 追加のK8sマニフェスト（ExternalSecret、ClusterSecretStoreなど）
 
 ### argocd/
 
@@ -27,14 +35,20 @@ ArgoCD Application CRDを配置する。このリポジトリ内のマニフェ�
 
 ## 運用方法
 
-### addonの追加・更新
-
-`addons/helmfile.yaml` を編集し、手動で適用する。
+### 初期セットアップ (bootstrap)
 
 ```bash
-cd addons
+cd addons/argocd
 helmfile sync
 ```
+
+### addonの追加
+
+1. `addons/<addon-name>/` ディレクトリを作成
+2. `addons/<addon-name>/helmfile.yaml` にHelm chart定義を配置
+3. `addons/<addon-name>/values.yaml` にHelmのカスタムvaluesを配置
+4. `argocd/addons/<addon-name>.yaml` にArgoCD Application定義を追加
+5. mainブランチにpushすると、ArgoCDが自動でsyncする
 
 ### 自作アプリの追加
 
@@ -45,3 +59,29 @@ helmfile sync
 ### 自作アプリの更新
 
 `apps/<app-name>/` 配下のマニフェストを変更してpushするだけで、ArgoCDが自動検知・syncする。
+
+## シークレット管理
+
+External Secrets Operator + Google Cloud Secret Manager でシークレットを管理する。
+
+### 初期設定
+
+1. GCPでService Accountを作成し、Secret Manager Admin ロールを付与
+2. Service Accountキー (JSON) をK8s Secretとして登録：
+
+```bash
+kubectl create namespace external-secrets
+kubectl create secret generic gcp-sa-key -n external-secrets \
+  --from-file=credentials.json=<path-to-sa-key.json>
+```
+
+3. ArgoCD が ClusterSecretStore と ExternalSecret を自動syncする
+
+### シークレットの登録例 (Cloudflare)
+
+```bash
+# GCP Secret Managerにシークレットを作成
+gcloud secrets create cloudflare-api-token --data-file=- <<< "<your-api-token>"
+gcloud secrets create cloudflare-account-id --data-file=- <<< "<your-account-id>"
+gcloud secrets create cloudflare-tunnel-name --data-file=- <<< "cloudflare-ingress"
+```
