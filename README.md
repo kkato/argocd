@@ -7,8 +7,8 @@ Kubernetesクラスタのマニフェスト管理リポジトリ。ArgoCDによ�
 ```
 k8s/
 ├── apps/          # 自作アプリケーション (素のK8sマニフェスト)
-├── addons/        # クラスタaddon (Helmfile管理)
-│   ├── helmfile.yaml
+│   └── recipe-api/
+├── addons/        # クラスタaddon (addonごとにディレクトリ)
 │   ├── argocd/
 │   ├── external-secrets/
 │   └── cloudflare-tunnel-ingress-controller/
@@ -26,6 +26,7 @@ k8s/
 ArgoCD、External Secrets Operatorなどのクラスタaddonを管理する。各addonはArgoCD Applicationで直接Helm chartを参照する。helmfile.yamlはbootstrap用として残す。
 
 各addonディレクトリには以下を配置する：
+- `helmfile.yaml` - Helm chart定義（bootstrap・ローカル確認用）
 - `values.yaml` - Helm chartのカスタムvalues
 - 追加のK8sマニフェスト（ExternalSecret、ClusterSecretStoreなど）
 
