@@ -13,6 +13,7 @@ k8s/
 │   ├── external-secrets/
 │   └── cloudflare-tunnel-ingress-controller/
 └── argocd/        # ArgoCD Application定義
+    ├── root.yaml  # App of Apps ルートApplication
     ├── apps/      # apps/ 配下のアプリ用
     └── addons/    # addons/ 配下のaddon用
 ```
@@ -34,13 +35,19 @@ ArgoCD、External Secrets Operatorなどのクラスタaddonを管理する。�
 
 ArgoCD Application CRDを配置する。このリポジトリ内のマニフェストをArgoCD経由でsync対象にするための定義。
 
+`root.yaml` がApp of AppsパターンのルートApplicationで、`argocd/` 配下のすべてのApplication定義を再帰的に監視・自動syncする。新しいApplication YAMLを追加してpushするだけでArgoCDに自動登録される。
+
 ## 運用方法
 
 ### 初期セットアップ (bootstrap)
 
 ```bash
+# 1. ArgoCD をインストール
 cd addons/argocd
 helmfile sync
+
+# 2. ルートApplicationを適用 (これが最初で最後の手動apply)
+kubectl apply -f argocd/root.yaml
 ```
 
 ### addonの追加
