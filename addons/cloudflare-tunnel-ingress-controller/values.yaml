@@ -1,5 +1,5 @@
 cloudflare:
-  tunnelName: cloudflare-ingress
+  tunnelName: kkato.app
   secretRef:
     name: cloudflare-credentials
     accountIDKey: account_id
