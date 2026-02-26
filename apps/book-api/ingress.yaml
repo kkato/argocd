@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: book-api
+  namespace: book-api
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    - host: book-api.kkato.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: book-api
+                port:
+                  number: 80
