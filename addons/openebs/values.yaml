@@ -1,0 +1,13 @@
+## OpenEBS custom values
+
+localpv-provisioner:
+  enabled: true
+
+lvm-localpv:
+  enabled: true
+
+zfs-localpv:
+  enabled: false
+
+mayastor:
+  enabled: false

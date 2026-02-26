@@ -11,7 +11,9 @@ k8s/
 ├── addons/        # クラスタaddon (addonごとにディレクトリ)
 │   ├── argocd/
 │   ├── external-secrets/
-│   └── cloudflare-tunnel-ingress-controller/
+│   ├── cloudflare-tunnel-ingress-controller/
+│   ├── openebs/
+│   └── cloudnative-pg/
 └── argocd/        # ArgoCD Application定義
     ├── root.yaml  # App of Apps ルートApplication
     ├── apps/      # apps/ 配下のアプリ用
@@ -67,6 +69,16 @@ kubectl apply -f argocd/root.yaml
 ### 自作アプリの更新
 
 `apps/<app-name>/` 配下のマニフェストを変更してpushするだけで、ArgoCDが自動検知・syncする。
+
+## リポジトリ外で管理されるコンポーネント
+
+以下のコンポーネントはこのリポジトリでは管理していない。
+
+| コンポーネント | namespace | 管理方法 | 備考 |
+|---|---|---|---|
+| Flannel (CNI) | `kube-flannel` | 手動 (`kubectl apply`) | CNIはクラスタのライフライン。自動syncで壊れるとノード間通信が全断するため手動管理が安全 |
+| CoreDNS | `kube-system` | kubeadm | kubeadmが管理するコントロールプレーンコンポーネント |
+| kube-proxy | `kube-system` | kubeadm | kubeadmが管理するコントロールプレーンコンポーネント |
 
 ## シークレット管理
 
