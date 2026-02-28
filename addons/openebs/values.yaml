@@ -3,11 +3,19 @@
 localpv-provisioner:
   enabled: true
 
-lvm-localpv:
-  enabled: true
+# Chart 4.4.0 uses engines.* keys for sub-chart conditions
+engines:
+  local:
+    lvm:
+      enabled: true
+    zfs:
+      enabled: false
+  replicated:
+    mayastor:
+      enabled: false
 
-zfs-localpv:
+loki:
   enabled: false
 
-mayastor:
+alloy:
   enabled: false
