@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: todo-app-go-db
+  namespace: todo-app-go
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: todo
+      owner: todouser
+      secret:
+        name: todo-app-go-db-creds
+  storage:
+    size: 1Gi
+    storageClass: openebs-hostpath

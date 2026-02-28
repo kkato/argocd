@@ -21,5 +21,13 @@ spec:
       containers:
       - image: ghcr.io/kkato/gin-fleamarket:latest
         name: gin-fleamarket
+        volumeMounts:
+        - name: env-file
+          mountPath: /app/.env
+          subPath: .env
+      volumes:
+      - name: env-file
+        secret:
+          secretName: gin-fleamarket-env
       imagePullSecrets:
       - name: ghcr
