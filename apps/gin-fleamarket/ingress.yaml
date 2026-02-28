@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gin-fleamarket
+  namespace: gin-fleamarket
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    - host: gin-fleamarket.kkato.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gin-fleamarket
+                port:
+                  number: 80
