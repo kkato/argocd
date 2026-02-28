@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://openebs.github.io/openebs
       chart: openebs
-      targetRevision: 4.2.0
+      targetRevision: 4.4.0
       helm:
         valueFiles:
           - $values/addons/openebs/values.yaml
