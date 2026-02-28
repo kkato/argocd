@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gin-fleamarket
+  namespace: gin-fleamarket
+spec:
+  selector:
+    app: gin-fleamarket
+  ports:
+    - port: 80
+      targetPort: 8080
