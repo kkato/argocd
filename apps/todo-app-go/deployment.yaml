@@ -21,5 +21,11 @@ spec:
       containers:
       - image: ghcr.io/kkato/todo-app-go:latest
         name: todo-app-go
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: dotenv
+              key: DATABASE_URL
       imagePullSecrets:
       - name: ghcr
