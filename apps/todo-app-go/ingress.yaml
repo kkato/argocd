@@ -5,7 +5,7 @@ metadata:
   namespace: todo-app-go
   annotations:
     portfolio.kkato.app/title: "Todo App"
-    portfolio.kkato.app/description: "GoとHTMXで作ったTodoアプリ"
+    portfolio.kkato.app/description: "Goとnet/httpで作ったTodoアプリ"
     portfolio.kkato.app/github: "https://github.com/kkato/todo-app-go"
     portfolio.kkato.app/tech: "Go,HTMX,PostgreSQL"
 spec:
