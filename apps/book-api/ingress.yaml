@@ -3,6 +3,11 @@ kind: Ingress
 metadata:
   name: book-api
   namespace: book-api
+  annotations:
+    portfolio.kkato.app/title: "Book API"
+    portfolio.kkato.app/description: "Goとnet/httpで作った書籍管理REST API"
+    portfolio.kkato.app/github: "https://github.com/kkato/book-api"
+    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
 spec:
   ingressClassName: cloudflare-tunnel
   rules:

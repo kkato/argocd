@@ -3,6 +3,11 @@ kind: Ingress
 metadata:
   name: recipe-api
   namespace: recipe-api
+  annotations:
+    portfolio.kkato.app/title: "Recipe API"
+    portfolio.kkato.app/description: "GoとGinで作ったレシピ管理REST API"
+    portfolio.kkato.app/github: "https://github.com/kkato/recipe-api"
+    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
 spec:
   ingressClassName: cloudflare-tunnel
   rules:
