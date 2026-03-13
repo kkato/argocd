@@ -5,7 +5,7 @@ metadata:
   namespace: gin-fleamarket
   annotations:
     portfolio.kkato.app/title: "Gin Fleamarket"
-    portfolio.kkato.app/description: "GoとGinで作ったフリマアプリ（JWT認証・PostgreSQL）"
+    portfolio.kkato.app/description: "GoとGinで作ったフリマアプリAPI（JWT認証・PostgreSQL連携）"
     portfolio.kkato.app/github: "https://github.com/kkato/gin-fleamarket"
     portfolio.kkato.app/tech: "Go,Gin,PostgreSQL,JWT"
 spec:
