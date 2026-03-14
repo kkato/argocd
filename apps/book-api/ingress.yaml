@@ -7,7 +7,10 @@ metadata:
     portfolio.kkato.app/title: "Book API"
     portfolio.kkato.app/description: "Goとnet/httpで作った書籍管理REST API"
     portfolio.kkato.app/github: "https://github.com/kkato/book-api"
-    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
+    portfolio.kkato.app/tech: "Go"
+    portfolio.kkato.app/commands: |
+      curl https://book-api.kkato.app/books
+      curl https://book-api.kkato.app/books/1
 spec:
   ingressClassName: cloudflare-tunnel
   rules:

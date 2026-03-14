@@ -5,9 +5,13 @@ metadata:
   namespace: gin-fleamarket
   annotations:
     portfolio.kkato.app/title: "Gin Fleamarket"
-    portfolio.kkato.app/description: "GoとGinで作ったフリマアプリAPI（JWT認証・PostgreSQL連携）"
+    portfolio.kkato.app/description: "GoとGinで作ったフリマアプリAPI"
     portfolio.kkato.app/github: "https://github.com/kkato/gin-fleamarket"
-    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL,JWT"
+    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
+    portfolio.kkato.app/commands: |
+      curl https://gin-fleamarket.kkato.app/items
+      curl -X POST https://gin-fleamarket.kkato.app/auth/signup -H 'Content-Type: application/json' -d '{"email":"user@example.com","password":"password"}'
+      curl -X POST https://gin-fleamarket.kkato.app/auth/login -H 'Content-Type: application/json' -d '{"email":"user@example.com","password":"password"}'
 spec:
   ingressClassName: cloudflare-tunnel
   rules:

@@ -7,7 +7,7 @@ metadata:
     portfolio.kkato.app/title: "Todo App"
     portfolio.kkato.app/description: "Goとnet/httpで作ったTodoアプリ"
     portfolio.kkato.app/github: "https://github.com/kkato/todo-app-go"
-    portfolio.kkato.app/tech: "Go,HTMX,PostgreSQL"
+    portfolio.kkato.app/tech: "Go,PostgreSQL"
 spec:
   ingressClassName: cloudflare-tunnel
   rules:

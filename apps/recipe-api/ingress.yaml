@@ -7,7 +7,10 @@ metadata:
     portfolio.kkato.app/title: "Recipe API"
     portfolio.kkato.app/description: "GoとGinで作ったレシピ管理REST API"
     portfolio.kkato.app/github: "https://github.com/kkato/recipe-api"
-    portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
+    portfolio.kkato.app/tech: "Go,Gin,SQLite"
+    portfolio.kkato.app/commands: |
+      curl https://recipe-api.kkato.app/recipes
+      curl https://recipe-api.kkato.app/recipes/1
 spec:
   ingressClassName: cloudflare-tunnel
   rules:
