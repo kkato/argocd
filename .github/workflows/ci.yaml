@@ -31,7 +31,7 @@ jobs:
   argocd-deploy:
     name: ArgoCD Deploy (${{ matrix.app }})
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.ARGOCD_SERVER != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ARGOCD_ENABLED == 'true'
     needs: validate
     strategy:
       matrix:
