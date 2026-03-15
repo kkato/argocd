@@ -10,8 +10,6 @@ metadata:
     portfolio.kkato.app/tech: "Go,Gin,PostgreSQL"
     portfolio.kkato.app/commands: |
       curl https://gin-fleamarket.kkato.app/items
-      curl -X POST https://gin-fleamarket.kkato.app/auth/signup -H 'Content-Type: application/json' -d '{"email":"user@example.com","password":"password"}'
-      curl -X POST https://gin-fleamarket.kkato.app/auth/login -H 'Content-Type: application/json' -d '{"email":"user@example.com","password":"password"}'
 spec:
   ingressClassName: cloudflare-tunnel
   rules:
