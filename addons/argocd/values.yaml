@@ -1,1 +1,10 @@
 ## ArgoCD custom values
+server:
+  ingress:
+    enabled: true
+    ingressClassName: cloudflare-tunnel
+    hostname: argocd.kkato.app
+    tls: false
+    annotations: {}
+  extraArgs:
+    - --insecure
