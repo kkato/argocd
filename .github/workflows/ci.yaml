@@ -35,7 +35,7 @@ jobs:
     needs: validate
     strategy:
       matrix:
-        app: [book-api, recipe-api]
+        app: [book-api, recipe-api, gin-fleamarket, portfolio, todo-app-go]
     steps:
       - name: Install ArgoCD CLI
         run: |
