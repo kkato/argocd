@@ -28,14 +28,35 @@ jobs:
               -kubernetes-version 1.32.0 \
               -summary
 
+  detect:
+    name: Detect Changed Apps
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      apps: ${{ steps.detect.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed apps
+        id: detect
+        run: |
+          apps=$(git diff --name-only HEAD~1 HEAD -- 'apps/' \
+            | cut -d/ -f2 \
+            | sort -u \
+            | jq -R . \
+            | jq -sc .)
+          echo "apps=$apps" >> $GITHUB_OUTPUT
+
   argocd-deploy:
     name: ArgoCD Deploy (${{ matrix.app }})
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: validate
+    needs: [validate, detect]
+    if: needs.detect.outputs.apps != '[]'
     strategy:
       matrix:
-        app: [book-api, recipe-api, gin-fleamarket, portfolio, todo-app-go]
+        app: ${{ fromJson(needs.detect.outputs.apps) }}
     steps:
       - name: Install ArgoCD CLI
         run: |
