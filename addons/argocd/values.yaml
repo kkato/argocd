@@ -1,4 +1,8 @@
 ## ArgoCD custom values
+configs:
+  cm:
+    accounts.admin: apiKey
+
 server:
   ingress:
     enabled: true
