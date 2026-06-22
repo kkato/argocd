@@ -5,23 +5,53 @@ injector:
   enabled: false
 
 server:
-  # standalone モード（file storage）で運用。HA/Raft は不要。
   standalone:
-    enabled: true
+    enabled: false
 
-  # openebs-hostpath PVC でデータを永続化する。
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable     = 1
+          address         = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        service_registration "kubernetes" {}
+
+  # 各 Pod に openebs-hostpath PVC を割り当て（StatefulSet volumeClaimTemplate）
   dataStorage:
     enabled: true
     storageClass: openebs-hostpath
     size: 2Gi
 
-  ha:
-    enabled: false
-
-  # TLS はクラスタ内通信のみのため無効。外部公開は port-forward 経由。
+  # TLS はクラスタ内通信のみのため無効。外部は Cloudflare エッジで TLS 終端。
   dev:
     enabled: false
 
-# UI は port-forward 経由で利用する（外部公開なし）。
+  # vault.kkato.app を Cloudflare Tunnel 経由で公開。TLS は Cloudflare エッジで終端。
+  # 公開ゲートは Cloudflare Access(Zero Trust) で保護する。
+  ingress:
+    enabled: true
+    ingressClassName: cloudflare-tunnel
+    pathType: Prefix
+    activeService: true
+    hosts:
+      - host: vault.kkato.app
+        paths:
+          - /
+    tls: []
+
+# UI は vault.kkato.app（Cloudflare Access 越し）で利用する。
 ui:
   enabled: true
