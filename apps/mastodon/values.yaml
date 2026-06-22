@@ -1,0 +1,82 @@
+# Mastodon Helm chart (mastodon/helm-charts 0.5.6) values
+# ドメイン・シングルユーザー運用設定
+mastodon:
+  localDomain: social.kkato.app
+  singleUserMode: true
+
+  # Cloudflare R2 メディアストレージ (S3 互換)
+  # R2 バケット作成後に bucket と endpoint を実際の値に変更すること
+  s3:
+    enabled: true
+    bucket: mastodon-media
+    endpoint: https://<account-id>.r2.cloudflarestorage.com
+    region: auto
+    # R2 カスタムドメインを設定する場合は aliasHost を指定（例: media.social.kkato.app）
+    aliasHost: ""
+    existingSecret: mastodon-s3  # keys: access-key-id, secret-access-key
+
+  # アプリケーションシークレット (ExternalSecret で GCP Secret Manager から取得)
+  secrets:
+    existingSecret: mastodon-secrets  # keys: secret-key-base, vapid-private-key, vapid-public-key,
+                                      #       are-primary-key, are-deterministic-key, are-derivation-salt
+
+  # 初回デプロイ時に管理者アカウントを作成する
+  # 生成されたパスワードは createAdmin Job のログで確認すること
+  createAdmin:
+    enabled: true
+    username: kkato
+    email: kkato149@gmail.com
+
+  # SMTP は後回し。設定する際は mastodon.smtp を追加する
+  # smtp:
+  #   server: smtp.example.com
+  #   port: 587
+  #   existingSecret: mastodon-smtp  # keys: login, password
+  #   from_address: notifications@social.kkato.app
+
+  web:
+    replicas: 1
+
+  streaming:
+    replicas: 1
+
+  sidekiq:
+    workers:
+      - replicas: 1
+        queues:
+          - default
+          - push
+          - pull
+          - mailers
+          - ingress
+          - scheduler
+
+# Cloudflare Tunnel Ingress
+ingress:
+  enabled: true
+  className: cloudflare-tunnel
+  hosts:
+    - host: social.kkato.app
+      paths:
+        - path: /
+  tls: []  # TLS は Cloudflare 側で終端するため不要
+
+# 外部 PostgreSQL (CNPG mastodon-db クラスタの RW サービス)
+postgresql:
+  hostname: mastodon-db-rw
+  port: 5432
+  database: mastodon_production
+  username: mastodon
+  existingSecret: mastodon-db
+  existingSecretKeys:
+    username: username
+    password: password
+
+# 全文検索は後回し。有効化する手順は README 参照
+elasticsearch:
+  enabled: false
+
+# 自前 Redis (apps/mastodon/resources/redis.yaml)
+redis:
+  hostname: mastodon-redis
+  port: 6379
