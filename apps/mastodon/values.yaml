@@ -8,6 +8,7 @@ mastodon:
   s3:
     enabled: true
     bucket: mastodon
+    hostname: c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     endpoint: https://c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     region: auto
     aliasHost: ""
