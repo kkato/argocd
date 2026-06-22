@@ -54,6 +54,10 @@ mastodon:
           - ingress
           - scheduler
 
+# Gateway API HTTPRoute はデフォルト有効なので明示的に無効化する
+httproute:
+  enabled: false
+
 # Cloudflare Tunnel Ingress
 ingress:
   enabled: true
@@ -62,6 +66,7 @@ ingress:
     - host: social.kkato.app
       paths:
         - path: /
+          pathType: Prefix
   tls: []  # TLS は Cloudflare 側で終端するため不要
 
 # 外部 PostgreSQL (CNPG mastodon-db クラスタの RW サービス)
