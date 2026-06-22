@@ -45,7 +45,8 @@ mastodon:
 
   sidekiq:
     workers:
-      - replicas: 1
+      - name: all
+        replicas: 1
         queues:
           - default
           - push
