@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
-  instances: 1
+  instances: 2
   bootstrap:
     initdb:
       database: mastodon_production
