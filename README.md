@@ -6,6 +6,10 @@ Kubernetesクラスタのマニフェスト管理リポジトリ。ArgoCDによ�
 
 ```
 k8s/
+├── apps/          # アプリケーション (Helm values + 素のK8sマニフェスト)
+│   └── mastodon/
+│       ├── values.yaml      # Helm values (ArgoCD ref: values で参照)
+│       └── resources/       # 素マニフェスト (CNPG Cluster, Redis, ExternalSecret 等)
 ├── addons/        # クラスタaddon (addonごとにディレクトリ)
 │   ├── argocd/
 │   ├── external-secrets/
@@ -14,6 +18,7 @@ k8s/
 │   └── cloudnative-pg/
 └── argocd/        # ArgoCD Application定義
     ├── root.yaml  # App of Apps ルートApplication
+    ├── apps/      # apps/ 配下のアプリ用
     └── addons/    # addons/ 配下のaddon用
 ```
 
@@ -53,6 +58,16 @@ kubectl apply -f argocd/root.yaml
 4. `argocd/addons/<addon-name>.yaml` にArgoCD Application定義を追加
 5. mainブランチにpushすると、ArgoCDが自動でsyncする
 
+### アプリの追加 (Helm chart + 周辺リソース)
+
+Mastodonのように「Helm chart + CNPG/Redis等の周辺リソース」をまとめてデプロイするパターン:
+
+1. `apps/<app-name>/values.yaml` にHelm values を配置
+2. `apps/<app-name>/resources/` に周辺リソースの素マニフェストを配置
+3. `argocd/apps/<app-name>.yaml` — Helm chart の multi-source Application を追加
+4. `argocd/apps/<app-name>-resources.yaml` — 素マニフェスト用 directory Application を追加
+5. mainブランチにpushすると、ArgoCDが自動でsyncする
+
 ## リポジトリ外で管理されるコンポーネント
 
 以下のコンポーネントはこのリポジトリでは管理していない。
@@ -88,3 +103,6 @@ gcloud secrets create cloudflare-api-token --data-file=- <<< "<your-api-token>"
 gcloud secrets create cloudflare-account-id --data-file=- <<< "<your-account-id>"
 gcloud secrets create cloudflare-tunnel-name --data-file=- <<< "cloudflare-ingress"
 ```
+
+各アプリのシークレット登録手順はそれぞれのディレクトリの README を参照:
+- [apps/mastodon/README.md](apps/mastodon/README.md)
