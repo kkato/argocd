@@ -5,13 +5,11 @@ mastodon:
   singleUserMode: true
 
   # Cloudflare R2 メディアストレージ (S3 互換)
-  # R2 バケット作成後に bucket と endpoint を実際の値に変更すること
   s3:
     enabled: true
-    bucket: mastodon-media
-    endpoint: https://<account-id>.r2.cloudflarestorage.com
+    bucket: mastodon
+    endpoint: https://c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     region: auto
-    # R2 カスタムドメインを設定する場合は aliasHost を指定（例: media.social.kkato.app）
     aliasHost: ""
     existingSecret: mastodon-s3  # keys: access-key-id, secret-access-key
 
