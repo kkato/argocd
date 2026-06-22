@@ -6,8 +6,6 @@ Kubernetesクラスタのマニフェスト管理リポジトリ。ArgoCDによ�
 
 ```
 k8s/
-├── apps/          # 自作アプリケーション (素のK8sマニフェスト)
-│   └── recipe-api/
 ├── addons/        # クラスタaddon (addonごとにディレクトリ)
 │   ├── argocd/
 │   ├── external-secrets/
@@ -16,13 +14,8 @@ k8s/
 │   └── cloudnative-pg/
 └── argocd/        # ArgoCD Application定義
     ├── root.yaml  # App of Apps ルートApplication
-    ├── apps/      # apps/ 配下のアプリ用
     └── addons/    # addons/ 配下のaddon用
 ```
-
-### apps/
-
-自作アプリケーションのK8sマニフェストを配置する。アプリケーションごとにサブディレクトリを作成する。
 
 ### addons/
 
@@ -59,16 +52,6 @@ kubectl apply -f argocd/root.yaml
 3. `addons/<addon-name>/values.yaml` にHelmのカスタムvaluesを配置
 4. `argocd/addons/<addon-name>.yaml` にArgoCD Application定義を追加
 5. mainブランチにpushすると、ArgoCDが自動でsyncする
-
-### 自作アプリの追加
-
-1. `apps/<app-name>/` にK8sマニフェストを配置
-2. `argocd/apps/<app-name>.yaml` にArgoCD Application定義を追加
-3. mainブランチにpushすると、ArgoCDが自動でsyncする
-
-### 自作アプリの更新
-
-`apps/<app-name>/` 配下のマニフェストを変更してpushするだけで、ArgoCDが自動検知・syncする。
 
 ## リポジトリ外で管理されるコンポーネント
 
