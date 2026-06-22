@@ -5,13 +5,11 @@ mastodon:
   singleUserMode: true
 
   # Cloudflare R2 メディアストレージ (S3 互換)
-  # R2 バケット作成後に bucket と endpoint を実際の値に変更すること
   s3:
     enabled: true
-    bucket: mastodon-media
-    endpoint: https://<account-id>.r2.cloudflarestorage.com
+    bucket: mastodon
+    endpoint: https://c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     region: auto
-    # R2 カスタムドメインを設定する場合は aliasHost を指定（例: media.social.kkato.app）
     aliasHost: ""
     existingSecret: mastodon-s3  # keys: access-key-id, secret-access-key
 
@@ -27,12 +25,16 @@ mastodon:
     username: kkato
     email: kkato149@gmail.com
 
-  # SMTP は後回し。設定する際は mastodon.smtp を追加する
-  # smtp:
-  #   server: smtp.example.com
-  #   port: 587
-  #   existingSecret: mastodon-smtp  # keys: login, password
-  #   from_address: notifications@social.kkato.app
+  # SMTP: チャートが username を必須とするためダミー値を設定（実際には送信しない）
+  # 本格運用時は server/login/password を実際の値に差し替える
+  smtp:
+    server: localhost
+    port: 25
+    from_address: notifications@social.kkato.app
+    login: notifications@social.kkato.app
+    password: placeholder
+    enable_starttls: never
+    auth_method: none
 
   web:
     replicas: 1
