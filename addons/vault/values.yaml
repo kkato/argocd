@@ -1,0 +1,27 @@
+## Vault custom values
+
+# Agent Injector は無効。シークレット配布は External Secrets Operator 経由で行う。
+injector:
+  enabled: false
+
+server:
+  # standalone モード（file storage）で運用。HA/Raft は不要。
+  standalone:
+    enabled: true
+
+  # openebs-hostpath PVC でデータを永続化する。
+  dataStorage:
+    enabled: true
+    storageClass: openebs-hostpath
+    size: 2Gi
+
+  ha:
+    enabled: false
+
+  # TLS はクラスタ内通信のみのため無効。外部公開は port-forward 経由。
+  dev:
+    enabled: false
+
+# UI は port-forward 経由で利用する（外部公開なし）。
+ui:
+  enabled: true
