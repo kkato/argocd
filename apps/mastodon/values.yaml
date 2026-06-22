@@ -47,6 +47,7 @@ mastodon:
     workers:
       - name: all
         replicas: 1
+        concurrency: 5
         queues:
           - default
           - push
