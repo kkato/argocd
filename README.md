@@ -80,28 +80,70 @@ Mastodonのように「Helm chart + CNPG/Redis等の周辺リソース」をま�
 
 ## シークレット管理
 
-External Secrets Operator + Google Cloud Secret Manager でシークレットを管理する。
+External Secrets Operator + HashiCorp Vault でシークレットを管理する。
+VaultはKubernetes内にセルフホスト（`vault` namespace）し、クラスタ外には公開しない。
 
-### 初期設定
+### Vault の初期セットアップ（初回のみ）
 
-1. GCPでService Accountを作成し、Secret Manager Admin ロールを付与
-2. Service Accountキー (JSON) をK8s Secretとして登録：
+ArgoCD が Vault Pod をデプロイした後、手動で初期化・設定を行う。
 
 ```bash
-kubectl create namespace external-secrets
-kubectl create secret generic gcp-sa-key -n external-secrets \
-  --from-file=credentials.json=<path-to-sa-key.json>
+# port-forward でローカルから接続
+kubectl -n vault port-forward svc/vault 8200:8200 &
+export VAULT_ADDR=http://127.0.0.1:8200
+
+# 初期化（unsealキー5つ・閾値3）。出力されるキーと root token は安全な場所にオフライン保管すること。
+vault operator init -key-shares=5 -key-threshold=3
+
+# unseal（3つのキーを順に入力）
+vault operator unseal
+vault operator unseal
+vault operator unseal
+
+vault login <root-token>
+
+# KV v2 有効化
+vault secrets enable -path=secret kv-v2
+
+# Kubernetes auth method（ESO が SA JWT で認証するために必要）
+vault auth enable kubernetes
+vault write auth/kubernetes/config \
+  kubernetes_host="https://kubernetes.default.svc"
+
+# ESO 用ポリシー
+vault policy write external-secrets - <<'EOF'
+path "secret/data/*"     { capabilities = ["read"] }
+path "secret/metadata/*" { capabilities = ["read", "list"] }
+EOF
+
+# ESO の ServiceAccount にロールを紐付け
+vault write auth/kubernetes/role/external-secrets \
+  bound_service_account_names=external-secrets \
+  bound_service_account_namespaces=external-secrets \
+  policies=external-secrets \
+  ttl=1h
 ```
 
-3. ArgoCD が ClusterSecretStore と ExternalSecret を自動syncする
+### Vault の unseal（Pod 再起動後）
+
+Vault Pod が再起動するたびに手動 unseal が必要。
+
+```bash
+kubectl -n vault port-forward svc/vault 8200:8200 &
+export VAULT_ADDR=http://127.0.0.1:8200
+vault operator unseal  # ×3（保管しているキーを使用）
+```
 
 ### シークレットの登録例 (Cloudflare)
 
 ```bash
-# GCP Secret Managerにシークレットを作成
-gcloud secrets create cloudflare-api-token --data-file=- <<< "<your-api-token>"
-gcloud secrets create cloudflare-account-id --data-file=- <<< "<your-account-id>"
-gcloud secrets create cloudflare-tunnel-name --data-file=- <<< "cloudflare-ingress"
+export VAULT_ADDR=http://127.0.0.1:8200
+vault login <root-token>
+
+vault kv put secret/cloudflare \
+  api_token="<your-api-token>" \
+  account_id="<your-account-id>" \
+  tunnel_name="cloudflare-ingress"
 ```
 
 各アプリのシークレット登録手順はそれぞれのディレクトリの README を参照:
