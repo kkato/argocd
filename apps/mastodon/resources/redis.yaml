@@ -31,7 +31,13 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
-          command: ["redis-server", "--appendonly", "yes"]
+          command: ["sh", "-c", "redis-server --appendonly yes --requirepass $REDIS_PASSWORD"]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mastodon-redis-auth
+                  key: redis-password
           ports:
             - containerPort: 6379
           volumeMounts:

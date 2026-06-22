@@ -82,3 +82,6 @@ elasticsearch:
 redis:
   hostname: mastodon-redis
   port: 6379
+  existingSecret: mastodon-redis-auth
+  existingSecretKeys:
+    password: redis-password
