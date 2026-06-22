@@ -25,16 +25,16 @@ mastodon:
     username: kkato
     email: kkato149@gmail.com
 
-  # SMTP: チャートが username を必須とするためダミー値を設定（実際には送信しない）
-  # 本格運用時は server/login/password を実際の値に差し替える
+  # SMTP: chart が username を必須とするためダミー値を設定（実際には送信しない）
+  # 本格運用時は server/username/password を実際の値に差し替える
   smtp:
     server: localhost
     port: 25
-    from_address: notifications@social.kkato.app
-    login: notifications@social.kkato.app
+    fromAddress: notifications@social.kkato.app
+    username: notifications@social.kkato.app
     password: placeholder
-    enable_starttls: never
-    auth_method: none
+    enableStartTls: never
+    authMethod: none
 
   web:
     replicas: 1
