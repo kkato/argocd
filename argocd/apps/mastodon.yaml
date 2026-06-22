@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mastodon
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://mastodon.github.io/helm-charts
+      chart: mastodon
+      targetRevision: 0.5.6
+      helm:
+        valueFiles:
+          - $values/apps/mastodon/values.yaml
+    - repoURL: git@github.com:kkato/k8s
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mastodon
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

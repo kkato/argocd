@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: mastodon-db
+  namespace: mastodon
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: mastodon_production
+      owner: mastodon
+      secret:
+        name: mastodon-db
+  storage:
+    size: 10Gi
+    storageClass: openebs-hostpath
