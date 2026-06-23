@@ -45,7 +45,7 @@ mastodon:
 
   sidekiq:
     workers:
-      - name: all
+      - name: default
         replicas: 3
         concurrency: 5
         queues:
@@ -54,6 +54,10 @@ mastodon:
           - pull
           - mailers
           - ingress
+      - name: scheduler
+        replicas: 1
+        concurrency: 5
+        queues:
           - scheduler
 
 # Gateway API HTTPRoute はデフォルト有効なので明示的に無効化する
