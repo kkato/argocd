@@ -11,7 +11,7 @@ mastodon:
     hostname: c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     endpoint: https://c0a9be02bb8b0f4a3a0461dc06777aeb.r2.cloudflarestorage.com
     region: auto
-    aliasHost: ""
+    aliasHost: media.social.kkato.app  # メディア公開配信用カスタムドメイン (S3_ALIAS_HOST)
     existingSecret: mastodon-s3  # keys: access-key-id, secret-access-key
 
   # アプリケーションシークレット (ExternalSecret で GCP Secret Manager から取得)
