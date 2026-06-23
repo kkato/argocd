@@ -22,7 +22,7 @@ mastodon:
   # 初回デプロイ時に管理者アカウントを作成する
   # 生成されたパスワードは createAdmin Job のログで確認すること
   createAdmin:
-    enabled: true
+    enabled: false
     username: kkato
     email: kkato149@gmail.com
 
