@@ -38,15 +38,15 @@ mastodon:
     authMethod: none
 
   web:
-    replicas: 1
+    replicas: 3
 
   streaming:
-    replicas: 1
+    replicas: 3
 
   sidekiq:
     workers:
       - name: all
-        replicas: 1
+        replicas: 3
         concurrency: 5
         queues:
           - default
