@@ -15,7 +15,9 @@ k8s/
 │   ├── external-secrets/
 │   ├── cloudflare-tunnel-ingress-controller/
 │   ├── openebs/
-│   └── cloudnative-pg/
+│   ├── cloudnative-pg/
+│   ├── metrics-server/              # HPA/VPA の前提（Metrics API）
+│   └── vertical-pod-autoscaler/    # VPA recommender（推奨値算出）
 └── argocd/        # ArgoCD Application定義
     ├── root.yaml  # App of Apps ルートApplication
     ├── apps/      # apps/ 配下のアプリ用
@@ -81,16 +83,20 @@ Mastodonのように「Helm chart + CNPG/Redis等の周辺リソース」をま�
 ## シークレット管理
 
 External Secrets Operator + HashiCorp Vault でシークレットを管理する。
-VaultはKubernetes内にセルフホスト（`vault` namespace）し、クラスタ外には公開しない。
+VaultはKubernetes内にセルフホスト（`vault` namespace）し、`vault.kkato.app` で Cloudflare Access（Zero Trust）越しに公開する。TLS は Cloudflare エッジで終端。CLI/UI ともに `cloudflared access tcp` 経由で接続する。
 
 ### Vault の初期セットアップ（初回のみ）
 
 ArgoCD が Vault Pod をデプロイした後、手動で初期化・設定を行う。
 
 ```bash
-# port-forward でローカルから接続
-kubectl -n vault port-forward svc/vault 8200:8200 &
+# cloudflared でローカルにトンネルを張る（別ターミナルで起動しっぱなしにする）
+# 初回はブラウザで Cloudflare Access 認証が必要。以降は Service Token で自動認証。
+cloudflared access tcp --hostname vault.kkato.app --url 127.0.0.1:8200 &
 export VAULT_ADDR=http://127.0.0.1:8200
+
+# 緊急時フォールバック（k8s ノードに直接アクセスできる環境のみ）:
+# kubectl -n vault port-forward svc/vault 8200:8200 &
 
 # 初期化（unsealキー5つ・閾値3）。出力されるキーと root token は安全な場所にオフライン保管すること。
 vault operator init -key-shares=5 -key-threshold=3
@@ -129,7 +135,8 @@ vault write auth/kubernetes/role/external-secrets \
 Vault Pod が再起動するたびに手動 unseal が必要。
 
 ```bash
-kubectl -n vault port-forward svc/vault 8200:8200 &
+# cloudflared でローカルにトンネルを張る（別ターミナルで起動しっぱなしにする）
+cloudflared access tcp --hostname vault.kkato.app --url 127.0.0.1:8200 &
 export VAULT_ADDR=http://127.0.0.1:8200
 vault operator unseal  # ×3（保管しているキーを使用）
 ```
@@ -137,7 +144,8 @@ vault operator unseal  # ×3（保管しているキーを使用）
 ### シークレットの登録例 (Cloudflare)
 
 ```bash
-export VAULT_ADDR=http://127.0.0.1:8200
+# vault-tunnel エイリアス（dotfiles）または cloudflared access tcp でトンネルを起動済みの状態で実行
+# export VAULT_ADDR は dotfiles の .zshrc で設定済み（http://127.0.0.1:8200）
 vault login <root-token>
 
 vault kv put secret/cloudflare \

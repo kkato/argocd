@@ -18,6 +18,23 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: mastodon
+  # HPA が replicas を管理するため selfHeal が差分を戻さないよう除外する
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: mastodon-web
+      jsonPointers:
+        - /spec/replicas
+    - group: apps
+      kind: Deployment
+      name: mastodon-streaming
+      jsonPointers:
+        - /spec/replicas
+    - group: apps
+      kind: Deployment
+      name: mastodon-sidekiq-default
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     automated:
       prune: true

@@ -16,6 +16,8 @@ apps/mastodon/
 └── resources/           # 素マニフェスト（ArgoCD directory Application）
     ├── cluster.yaml     # CNPG Cluster（PostgreSQL）
     ├── redis.yaml       # Redis Deployment + Service + PVC
+    ├── hpa.yaml         # HorizontalPodAutoscaler（web / streaming / sidekiq-default）
+    ├── vpa.yaml         # VerticalPodAutoscaler - updateMode: Off（推奨値算出のみ）
     ├── external-secret-db.yaml       # mastodon-db Secret（DB 認証情報）
     ├── external-secret-secrets.yaml  # mastodon-secrets Secret（app secrets）
     └── external-secret-s3.yaml       # mastodon-s3 Secret（R2 認証情報）
@@ -95,6 +97,43 @@ kubectl logs -n mastodon job/mastodon-create-admin
 ```
 
 ブラウザで `https://social.kkato.app` にアクセスしてログインする。
+
+## オートスケール（HPA / VPA）
+
+### 構成
+
+| workload | HPA | VPA |
+|---|---|---|
+| `mastodon-web` | CPU 70%、min 3 / max 6 | Off（推奨値算出のみ） |
+| `mastodon-streaming` | CPU 70%、min 3 / max 6 | Off（推奨値算出のみ） |
+| `mastodon-sidekiq-default` | CPU 75%、min 3 / max 8 | Off（推奨値算出のみ） |
+| `mastodon-sidekiq-scheduler` | 対象外（常に 1 固定） | Off（推奨値算出のみ） |
+
+VPA の `updateMode: "Off"` は Pod を自動リサイズしない。`kubectl describe vpa` で推奨値を確認し、`values.yaml` の resources を手動で調整する運用。
+
+### 確認コマンド
+
+```bash
+# HPA の状態（TARGETS に実 % が表示されていれば metrics-server 正常）
+kubectl get hpa -n mastodon
+
+# VPA の推奨値を確認（recommender が数分後に算出）
+kubectl describe vpa -n mastodon
+
+# Pod のリソース使用量
+kubectl top pods -n mastodon
+```
+
+### VPA 推奨値を反映する手順
+
+1. `kubectl describe vpa mastodon-web -n mastodon` で `target` の cpu / memory を確認
+2. `apps/mastodon/values.yaml` の `mastodon.web.resources.requests` を推奨値に更新して push
+3. ArgoCD が自動 sync し、Deployment がローリングアップデートされる
+
+### 前提 addon
+
+- **metrics-server**（namespace: `kube-system`）: Metrics API を提供。HPA / VPA 両方の前提
+- **vertical-pod-autoscaler**（namespace: `vpa`）: recommender のみ起動（updater / admissionController は無効）
 
 ## SMTP の追加（後から設定する場合）
 

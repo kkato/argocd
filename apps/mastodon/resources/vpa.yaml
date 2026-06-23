@@ -1,0 +1,51 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: mastodon-web
+  namespace: mastodon
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mastodon-web
+  updatePolicy:
+    updateMode: "Off"  # 推奨値算出のみ。自動リサイズしない
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: mastodon-streaming
+  namespace: mastodon
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mastodon-streaming
+  updatePolicy:
+    updateMode: "Off"
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: mastodon-sidekiq-default
+  namespace: mastodon
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mastodon-sidekiq-default
+  updatePolicy:
+    updateMode: "Off"
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: mastodon-sidekiq-scheduler
+  namespace: mastodon
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mastodon-sidekiq-scheduler
+  updatePolicy:
+    updateMode: "Off"

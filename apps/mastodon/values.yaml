@@ -39,11 +39,29 @@ mastodon:
 
   web:
     replicas: 3
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        memory: 1Gi  # cpu limit は設定しない(スロットリング回避)
 
   streaming:
     replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
 
   sidekiq:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        memory: 1Gi  # cpu limit は設定しない(スロットリング回避)
     workers:
       - name: default
         replicas: 3

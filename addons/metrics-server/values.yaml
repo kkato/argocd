@@ -1,0 +1,5 @@
+## metrics-server custom values
+# kubeadm クラスタの kubelet serving 証明書は自己署名のため
+# --kubelet-insecure-tls が無いと metrics-server が kubelet に接続できない
+args:
+  - --kubelet-insecure-tls

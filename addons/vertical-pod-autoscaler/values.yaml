@@ -1,0 +1,11 @@
+## VPA custom values
+# VPA(Off) モード運用: 推奨値算出のみ行い、自動リサイズしない
+# そのため recommender のみ有効化し updater / admissionController は無効化する
+recommender:
+  enabled: true
+
+updater:
+  enabled: false
+
+admissionController:
+  enabled: false
