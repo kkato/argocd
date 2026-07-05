@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radio-recorder
+  namespace: home-recorder
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # media PVC (RWO) を確実に引き継ぐ
+  selector:
+    matchLabels:
+      app: radio-recorder
+  template:
+    metadata:
+      labels:
+        app: radio-recorder
+    spec:
+      containers:
+        - name: radio-recorder
+          image: ghcr.io/kkato/radio-recorder:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: MEDIA_DIR
+              value: /media/radio
+            - name: POLL_INTERVAL
+              value: 1h
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: radio-recorder-db-app
+                  key: uri
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: media
+              mountPath: /media
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media

@@ -1,0 +1,14 @@
+# 予約ルールと録音状態を保持する PostgreSQL。
+# アプリは operator が生成する Secret `radio-recorder-db-app` の `uri` で接続する。
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: radio-recorder-db
+  namespace: home-recorder
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+    storageClass: openebs-hostpath

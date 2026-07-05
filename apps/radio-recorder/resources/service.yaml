@@ -1,0 +1,15 @@
+# 予約 UI。クラスタ内どのノードでも http://<ノードIP>:30081 で開ける。
+apiVersion: v1
+kind: Service
+metadata:
+  name: radio-recorder
+  namespace: home-recorder
+spec:
+  type: NodePort
+  selector:
+    app: radio-recorder
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 30081

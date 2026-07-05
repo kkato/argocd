@@ -1,0 +1,16 @@
+# 録画・録音データの保存先（tv-recorder / radio-recorder と共有）。
+# openebs-hostpath はノードローカルなので、NAS 導入時は storageClassName を差し替える。
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: home-recorder
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  storageClassName: openebs-hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
