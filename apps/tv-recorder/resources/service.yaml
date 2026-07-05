@@ -1,4 +1,4 @@
-# 予約 UI。クラスタ内どのノードでも http://<ノードIP>:30080 で開ける。
+# 予約 UI。クラスタ内どのノードでも http://<ノードIP>:30082 で開ける。
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,4 +12,4 @@ spec:
     - name: http
       port: 8080
       targetPort: http
-      nodePort: 30080
+      nodePort: 30082
