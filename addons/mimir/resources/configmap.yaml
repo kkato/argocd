@@ -1,6 +1,5 @@
 # Grafana Mimir 単一バイナリ (-target=all) 構成。
-# S3 認証情報は環境変数展開 (-config.expand-env=true) でランタイムに注入する (statefulset.yaml 参照)。
-# 平文の access_key_id / secret_access_key を直接書かないこと。
+# オブジェクトストレージは使わず、openebs-hostpath上のfilesystemバックエンド(chartデフォルト)で運用する。
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,29 +14,22 @@ data:
       http_listen_port: 8080
       grpc_listen_port: 9095
 
-    common:
-      storage:
-        backend: s3
-        s3:
-          endpoint: minio.minio.svc.cluster.local:9000
-          access_key_id: ${MINIO_ACCESS_KEY}
-          secret_access_key: ${MINIO_SECRET_KEY}
-          insecure: true
-          bucket_name: mimir
-
-    # 単一バケット(mimir)を prefix で使い分ける。
+    # filesystemバックエンド(デフォルト)を使い、各ストレージ用に別ディレクトリを割り当てる。
     blocks_storage:
-      storage_prefix: blocks
+      filesystem:
+        dir: /data/blocks
       tsdb:
         dir: /data/tsdb
       bucket_store:
         sync_dir: /data/tsdb-sync
 
     alertmanager_storage:
-      storage_prefix: alertmanager
+      filesystem:
+        dir: /data/alertmanager
 
     ruler_storage:
-      storage_prefix: ruler
+      filesystem:
+        dir: /data/ruler
 
     compactor:
       data_dir: /data/compactor

@@ -1,18 +1,12 @@
 # Tempo
 
-分散トレーシング（monolithic mode）。MinIOをオブジェクトストレージのバックエンドに使用する。
+分散トレーシング（monolithic mode）。オブジェクトストレージは使わず、chartデフォルトのlocalバックエンド(openebs-hostpath)で運用する。
 
 - chart: [`tempo`](https://github.com/grafana-community/helm-charts) 2.2.3
-- ストレージ: MinIOの`tempo`バケット
-- 永続化: `openebs-hostpath` 10Gi（ローカルWAL用）
+- ストレージ: `openebs-hostpath`上のlocalバックエンド(chartデフォルト)
+- 永続化: `openebs-hostpath` 10Gi
 - 保持期間: 7日（`tempo.retention`。トレースは容量に対して価値の減衰が早いため短め）
 - OTLP受信(gRPC:4317 / HTTP:4318)はchartデフォルトで有効。Grafana Alloyからのトレース転送先
-
-## デプロイ前の手動準備
-
-### S3認証情報
-
-[addons/minio/README.md](../minio/README.md) の手順でMinIOの監視スタック用ユーザーを作成し、`secret/minio/monitoring`にVault登録しておく。Mimir/Loki/Tempoはこの1つの認証情報を共有する。個別の追加登録は不要。
 
 ## デプロイ後の確認
 

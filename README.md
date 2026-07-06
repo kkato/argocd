@@ -18,7 +18,6 @@ k8s/
 │   ├── cloudnative-pg/
 │   ├── metrics-server/              # HPA/VPA の前提（Metrics API）
 │   ├── vertical-pod-autoscaler/    # VPA recommender（推奨値算出）
-│   ├── minio/                      # 監視スタック用オブジェクトストレージ (S3互換)
 │   ├── mimir/                      # Prometheusのバックエンドストレージ (単一バイナリ)
 │   ├── kube-prometheus-stack/      # Prometheus Operator + Prometheus + Alertmanager
 │   ├── loki/                       # ログ集約
@@ -95,9 +94,5 @@ VaultはKubernetes内にセルフホスト（`vault` namespace）し、`vault.kk
 Vaultの初期セットアップ・unseal手順、各アプリ/addonのシークレット登録手順はそれぞれのディレクトリの README を参照:
 - [addons/vault/README.md](addons/vault/README.md)
 - [addons/cloudflare-tunnel-ingress-controller/README.md](addons/cloudflare-tunnel-ingress-controller/README.md)
-- [addons/minio/README.md](addons/minio/README.md)
-- [addons/mimir/README.md](addons/mimir/README.md)
-- [addons/loki/README.md](addons/loki/README.md)
-- [addons/tempo/README.md](addons/tempo/README.md)
 - [addons/grafana/README.md](addons/grafana/README.md)
 - [apps/mastodon/README.md](apps/mastodon/README.md)

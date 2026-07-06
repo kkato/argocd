@@ -1,18 +1,12 @@
 # Loki
 
-ログ集約（SingleBinary/monolithic mode）。MinIOをオブジェクトストレージのバックエンドに使用する。
+ログ集約（SingleBinary/monolithic mode）。オブジェクトストレージは使わず、openebs-hostpath上のfilesystemバックエンドで運用する。
 
 - chart: [`grafana/loki`](https://github.com/grafana/loki) 7.0.0
-- ストレージ: MinIOの`loki`バケット
-- 永続化: `openebs-hostpath` 20Gi
+- ストレージ: `openebs-hostpath`上のfilesystemバックエンド
+- 永続化: `openebs-hostpath` 30Gi（実データを恒久保持するため）
 - 保持期間: 30日（`limits_config.retention_period` + `compactor.retention_enabled`）
 - 前段のnginx gatewayは無効化し、singleBinaryが直接3100番で応答する
-
-## デプロイ前の手動準備
-
-### S3認証情報
-
-[addons/minio/README.md](../minio/README.md) の手順でMinIOの監視スタック用ユーザーを作成し、`secret/minio/monitoring`にVault登録しておく。Mimir/Loki/Tempoはこの1つの認証情報を共有する。個別の追加登録は不要。
 
 ## デプロイ後の確認
 
