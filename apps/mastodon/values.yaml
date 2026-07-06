@@ -104,9 +104,12 @@ postgresql:
     username: username
     password: password
 
-# 全文検索は後回し。有効化する手順は README 参照
+# 全文検索: 自前 Elasticsearch (apps/mastodon/resources/elasticsearch.yaml)
 elasticsearch:
-  enabled: false
+  enabled: true
+  hostname: mastodon-es
+  port: 9200
+  tls: false
 
 # 自前 Redis (apps/mastodon/resources/redis.yaml)
 redis:
