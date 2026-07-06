@@ -6,7 +6,7 @@
 - DB: CloudNative-PG（`mastodon-db`）
 - メディア: Cloudflare R2（S3 互換）
 - 登録: クローズ（シングルユーザー）
-- 全文検索: 後回し（後から有効化可能）
+- 全文検索: 有効化済み（自前 Elasticsearch, single-node）
 
 ## ディレクトリ構成
 
@@ -16,6 +16,7 @@ apps/mastodon/
 └── resources/           # 素マニフェスト（ArgoCD directory Application）
     ├── cluster.yaml     # CNPG Cluster（PostgreSQL）
     ├── redis.yaml       # Redis Deployment + Service + PVC
+    ├── elasticsearch.yaml  # Elasticsearch Deployment + Service + PVC（全文検索用）
     ├── hpa.yaml         # HorizontalPodAutoscaler（web / streaming / sidekiq-default）
     ├── vpa.yaml         # VerticalPodAutoscaler - updateMode: Off（推奨値算出のみ）
     ├── external-secret-db.yaml       # mastodon-db Secret（DB 認証情報）
@@ -151,92 +152,26 @@ mastodon:
 GCP Secret Manager にも `mastodon-smtp-login` / `mastodon-smtp-password` を登録し、
 `resources/external-secret-secrets.yaml`（または新規ファイル）に ExternalSecret を追加する。
 
-## 全文検索（Elasticsearch）を後から有効化する手順
+## 全文検索（Elasticsearch）
 
-### 1. `resources/elasticsearch.yaml` を新規作成
+自前の Elasticsearch（single-node, `resources/elasticsearch.yaml`）を `mastodon` namespace 内にデプロイし、
+`values.yaml` の `elasticsearch.enabled: true` / `hostname: mastodon-es` / `port: 9200` で接続している。
 
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mastodon-es
-  namespace: mastodon
-spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: openebs-hostpath
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mastodon-es
-  namespace: mastodon
-  labels:
-    app: mastodon-es
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mastodon-es
-  template:
-    metadata:
-      labels:
-        app: mastodon-es
-    spec:
-      containers:
-        - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:8.18.2
-          env:
-            - name: discovery.type
-              value: single-node
-            - name: xpack.security.enabled
-              value: "false"
-            - name: ES_JAVA_OPTS
-              value: "-Xms512m -Xmx512m"
-          ports:
-            - containerPort: 9200
-          volumeMounts:
-            - name: data
-              mountPath: /usr/share/elasticsearch/data
-          resources:
-            requests:
-              memory: 1Gi
-            limits:
-              memory: 2Gi
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: mastodon-es
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mastodon-es
-  namespace: mastodon
-spec:
-  selector:
-    app: mastodon-es
-  ports:
-    - port: 9200
-      targetPort: 9200
-```
+### インデックスの作成・再作成
 
-### 2. `values.yaml` の elasticsearch セクションを変更
-
-```yaml
-elasticsearch:
-  enabled: true
-  hostname: mastodon-es
-  port: 9200
-  tls: false
-```
-
-### 3. push して ArgoCD sync を待つ
-
-### 4. インデックスを作成
+初回デプロイ後、またはスキーマ変更後は以下でインデックスを作成する:
 
 ```bash
 kubectl exec -n mastodon deploy/mastodon-web -- bin/tootctl search deploy
+```
+
+### 状態確認
+
+```bash
+# Pod / PVC の起動確認
+kubectl get pods -n mastodon -l app=mastodon-es
+kubectl get pvc -n mastodon mastodon-es
+
+# インデックス状態確認
+kubectl exec -n mastodon deploy/mastodon-web -- bin/tootctl search deploy --only=accounts,statuses,tags --only-if-required
 ```
