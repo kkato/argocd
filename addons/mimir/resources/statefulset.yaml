@@ -21,18 +21,6 @@ spec:
           image: grafana/mimir:3.1.2
           args:
             - -config.file=/etc/mimir/mimir.yaml
-            - -config.expand-env=true
-          env:
-            - name: MINIO_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: mimir-s3-credentials
-                  key: access-key
-            - name: MINIO_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: mimir-s3-credentials
-                  key: secret-key
           ports:
             - name: http
               containerPort: 8080
@@ -63,4 +51,4 @@ spec:
         storageClassName: openebs-hostpath
         resources:
           requests:
-            storage: 20Gi
+            storage: 50Gi
