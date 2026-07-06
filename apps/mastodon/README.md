@@ -6,7 +6,7 @@
 - DB: CloudNative-PG（`mastodon-db`）
 - メディア: Cloudflare R2（S3 互換）
 - 登録: クローズ（シングルユーザー）
-- 全文検索: 有効化済み（自前 Elasticsearch, single-node）
+- 全文検索: 有効化済み（自前 Elasticsearch, 3ノードクラスタ）
 
 ## ディレクトリ構成
 
@@ -16,7 +16,7 @@ apps/mastodon/
 └── resources/           # 素マニフェスト（ArgoCD directory Application）
     ├── cluster.yaml     # CNPG Cluster（PostgreSQL）
     ├── redis.yaml       # Redis Deployment + Service + PVC
-    ├── elasticsearch.yaml  # Elasticsearch Deployment + Service + PVC（全文検索用）
+    ├── elasticsearch.yaml  # Elasticsearch StatefulSet(3 replica) + Service + Headless Service（全文検索用）
     ├── hpa.yaml         # HorizontalPodAutoscaler（web / streaming / sidekiq-default）
     ├── vpa.yaml         # VerticalPodAutoscaler - updateMode: Off（推奨値算出のみ）
     ├── external-secret-db.yaml       # mastodon-db Secret（DB 認証情報）
@@ -154,8 +154,11 @@ GCP Secret Manager にも `mastodon-smtp-login` / `mastodon-smtp-password` を�
 
 ## 全文検索（Elasticsearch）
 
-自前の Elasticsearch（single-node, `resources/elasticsearch.yaml`）を `mastodon` namespace 内にデプロイし、
-`values.yaml` の `elasticsearch.enabled: true` / `hostname: mastodon-es` / `port: 9200` で接続している。
+自前の Elasticsearch 3ノードクラスタ（`resources/elasticsearch.yaml`）を `mastodon` namespace 内にデプロイし、
+`values.yaml` の `elasticsearch.enabled: true` / `hostname: mastodon-es` / `port: 9200` / `preset: small_cluster` で接続している。
+
+Mastodon本体は複数ホスト指定に対応していないため、`mastodon-es` Service（非headless）が3 Pod へロードバランスする単一エンドポイントとして機能する。
+discovery 用に `mastodon-es-headless`（clusterIP: None）を別途用意し、StatefulSet の各 Pod (`mastodon-es-0/1/2`) が専用の PVC を持つ。
 
 ### インデックスの作成・再作成
 
@@ -170,7 +173,10 @@ kubectl exec -n mastodon deploy/mastodon-web -- bin/tootctl search deploy
 ```bash
 # Pod / PVC の起動確認
 kubectl get pods -n mastodon -l app=mastodon-es
-kubectl get pvc -n mastodon mastodon-es
+kubectl get pvc -n mastodon -l app=mastodon-es
+
+# クラスタの状態確認（3ノード認識・status: green を期待）
+kubectl exec -n mastodon mastodon-es-0 -- curl -s localhost:9200/_cluster/health
 
 # インデックス状態確認
 kubectl exec -n mastodon deploy/mastodon-web -- bin/tootctl search deploy --only=accounts,statuses,tags --only-if-required
