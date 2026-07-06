@@ -1,0 +1,48 @@
+## Grafana custom values
+##
+## Mimir(Prometheus互換API)/Loki/Tempoをデータソースとして事前プロビジョニングする。
+
+admin:
+  existingSecret: grafana-admin-credentials
+  userKey: admin-user
+  passwordKey: admin-password
+
+persistence:
+  enabled: true
+  storageClassName: openebs-hostpath
+  size: 2Gi
+
+ingress:
+  enabled: true
+  ingressClassName: cloudflare-tunnel
+  hosts:
+    - grafana.kkato.app
+  tls: []
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Mimir
+        uid: mimir
+        type: prometheus
+        url: http://mimir.monitoring.svc.cluster.local:8080/prometheus
+        access: proxy
+        isDefault: true
+      - name: Loki
+        uid: loki
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100
+        access: proxy
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        url: http://tempo.monitoring.svc.cluster.local:3200
+        access: proxy
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: loki
+          tracesToMetrics:
+            datasourceUid: mimir
+          serviceMap:
+            datasourceUid: mimir

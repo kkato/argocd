@@ -1,0 +1,36 @@
+## kube-prometheus-stack custom values
+##
+## Prometheus Operator + Prometheus + Alertmanager + node-exporter + kube-state-metrics。
+## bundled Grafanaは無効化し、Grafanaはaddons/grafanaで別途導入する。
+
+grafana:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    # 長期保存はMimirへremote_writeするため、ローカルは短期保持でよい。
+    retention: 24h
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: openebs-hostpath
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    remoteWrite:
+      - url: http://mimir.monitoring.svc.cluster.local:8080/api/v1/push
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: openebs-hostpath
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+  # config はchartデフォルト(nullレシーバ)のまま。
+  # TODO: Slack通知を追加する場合は、ExternalSecret経由でVault(secret/alertmanager/slack)から
+  # webhook URLを注入し、alertmanager.config.receivers/route に追記する。

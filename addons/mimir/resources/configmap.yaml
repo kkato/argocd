@@ -1,0 +1,61 @@
+# Grafana Mimir 単一バイナリ (-target=all) 構成。
+# S3 認証情報は環境変数展開 (-config.expand-env=true) でランタイムに注入する (statefulset.yaml 参照)。
+# 平文の access_key_id / secret_access_key を直接書かないこと。
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mimir-config
+  namespace: monitoring
+data:
+  mimir.yaml: |
+    # ホームクラスタの単一テナント運用のため multitenancy は無効化する。
+    multitenancy_enabled: false
+
+    server:
+      http_listen_port: 8080
+      grpc_listen_port: 9095
+
+    common:
+      storage:
+        backend: s3
+        s3:
+          endpoint: minio.minio.svc.cluster.local:9000
+          access_key_id: ${MINIO_ACCESS_KEY}
+          secret_access_key: ${MINIO_SECRET_KEY}
+          insecure: true
+          bucket_name: mimir
+
+    # 単一バケット(mimir)を prefix で使い分ける。
+    blocks_storage:
+      storage_prefix: blocks
+      tsdb:
+        dir: /data/tsdb
+      bucket_store:
+        sync_dir: /data/tsdb-sync
+
+    alertmanager_storage:
+      storage_prefix: alertmanager
+
+    ruler_storage:
+      storage_prefix: ruler
+
+    compactor:
+      data_dir: /data/compactor
+      compaction_interval: 30m
+
+    # 単一replica運用のため、各リング(ingester/store-gateway/alertmanager)の
+    # replication_factor はデフォルト(3)から1に下げる必要がある。
+    ingester:
+      ring:
+        replication_factor: 1
+
+    store_gateway:
+      sharding_ring:
+        replication_factor: 1
+
+    alertmanager:
+      sharding_ring:
+        replication_factor: 1
+
+    limits:
+      compactor_blocks_retention_period: 90d

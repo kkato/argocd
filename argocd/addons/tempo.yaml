@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    - repoURL: https://grafana-community.github.io/helm-charts
+      chart: tempo
+      targetRevision: 2.2.3
+      helm:
+        valueFiles:
+          - $values/addons/tempo/values.yaml
+    - repoURL: git@github.com:kkato/k8s
+      targetRevision: main
+      ref: values
+    - repoURL: git@github.com:kkato/k8s
+      targetRevision: main
+      path: addons/tempo
+      directory:
+        recurse: true
+        exclude: '{helmfile.yaml,values.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

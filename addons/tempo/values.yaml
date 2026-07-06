@@ -1,0 +1,39 @@
+## Tempo custom values (monolithic mode)
+##
+## MinIO を S3 互換オブジェクトストレージのバックエンドとして使用する。
+## S3 認証情報は環境変数展開 (-config.expand-env=true) でランタイムに注入する
+## (addons/tempo/resources/external-secret-s3.yaml で作成される tempo-s3-credentials Secret 経由)。
+##
+## OTLP受信(gRPC:4317, HTTP:4318)はchartのデフォルトで有効。Grafana Alloyからのトレース転送先として使う。
+
+tempo:
+  storage:
+    trace:
+      backend: s3
+      s3:
+        bucket: tempo
+        endpoint: minio.minio.svc.cluster.local:9000
+        access_key: ${MINIO_ACCESS_KEY}
+        secret_key: ${MINIO_SECRET_KEY}
+        insecure: true
+
+  # トレースは容量に対して価値の減衰が早いため保持期間は短めにする。
+  retention: 168h # 7日
+
+  extraArgs:
+    config.expand-env: "true"
+
+  extraEnvFrom:
+    - secretRef:
+        name: tempo-s3-credentials
+
+  resources:
+    requests:
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+persistence:
+  enabled: true
+  storageClassName: openebs-hostpath
+  size: 10Gi
