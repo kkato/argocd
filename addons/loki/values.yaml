@@ -1,0 +1,64 @@
+## Loki custom values (SingleBinary / monolithic mode)
+##
+## MinIO を S3 互換オブジェクトストレージのバックエンドとして使用する。
+## S3 認証情報は環境変数展開 (-config.expand-env=true) でランタイムに注入する
+## (addons/loki/resources/external-secret-s3.yaml で作成される loki-s3-credentials Secret 経由)。
+
+deploymentMode: SingleBinary
+
+# 別途 addons/minio で共有 MinIO を運用するため、chart内蔵の minio 依存は無効化する。
+minio:
+  enabled: false
+
+loki:
+  commonConfig:
+    replication_factor: 1
+
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  storage:
+    type: s3
+    bucketNames:
+      chunks: loki
+      ruler: loki
+      admin: loki
+    s3:
+      endpoint: minio.minio.svc.cluster.local:9000
+      region: us-east-1
+      accessKeyId: ${MINIO_ACCESS_KEY}
+      secretAccessKey: ${MINIO_SECRET_KEY}
+      s3ForcePathStyle: true
+      insecure: true
+
+  limits_config:
+    retention_period: 720h # 30日
+
+  compactor:
+    retention_enabled: true
+
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: openebs-hostpath
+
+# singleBinary が直接応答するため、前段のnginx gatewayは不要。
+gateway:
+  enabled: false
+
+# S3認証情報を環境変数として渡し、config内で ${MINIO_ACCESS_KEY} 等を展開する。
+global:
+  extraArgs:
+    - -config.expand-env=true
+  extraEnvFrom:
+    - secretRef:
+        name: loki-s3-credentials

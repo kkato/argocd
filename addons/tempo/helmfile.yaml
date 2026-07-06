@@ -1,0 +1,12 @@
+repositories:
+  - name: grafana-community
+    url: https://grafana-community.github.io/helm-charts
+
+releases:
+  - name: tempo
+    namespace: monitoring
+    createNamespace: true
+    chart: grafana-community/tempo
+    version: 2.2.3
+    values:
+      - values.yaml
