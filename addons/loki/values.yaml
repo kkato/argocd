@@ -38,6 +38,14 @@ singleBinary:
     size: 30Gi
     storageClass: openebs-hostpath
 
+# SimpleScalableモード用ターゲット。SingleBinaryモードと併用不可のバリデーションがあるため明示的に0にする。
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
 # singleBinary が直接応答するため、前段のnginx gatewayは不要。
 gateway:
   enabled: false
