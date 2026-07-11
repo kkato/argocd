@@ -9,6 +9,10 @@ minio:
   enabled: false
 
 loki:
+  # gateway(nginx)を無効化しデフォルトテナントの注入層が無いため、
+  # 単一テナント運用として認証自体を無効化する。
+  auth_enabled: false
+
   commonConfig:
     replication_factor: 1
 
