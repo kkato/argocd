@@ -14,6 +14,20 @@ tempo:
     limits:
       memory: 1Gi
 
+  # metrics-generatorを有効化する。無効のままだとTraceQLメトリクスクエリ(rate()等)が
+  # 参照するリングにgeneratorが登録されず "empty ring" エラーになる。
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://mimir.monitoring.svc.cluster.local:8080/api/v1/push"
+
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - local-blocks # TraceQLメトリクス(rate()等)のqueryRangeRecentに必須
+          - span-metrics
+          - service-graphs
+
 persistence:
   enabled: true
   storageClassName: openebs-hostpath
